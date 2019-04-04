@@ -1,0 +1,76 @@
+# Devfile for creating Eclipse Che workspace for development of the eduke32 project.
+# Provides environment which allows to develop, build and run the project.
+# Limitations: only software render (no hardware acceleration on kubernetes cluster), no sound.
+
+specVersion: 0.0.1
+name: eduke32
+projects:
+  - name: eduke32-devfile
+    source:
+      type: git
+      location: 'https://github.com/mmorhun/eduke32-devfile.git'
+components:
+  - name: theia-editor
+    type: cheEditor
+    id: org.eclipse.che.editor.theia:1.0.0
+  - name: exec-plugin
+    type: chePlugin
+    id: che-machine-exec-plugin:0.0.1
+  - name: yaml-support-plugin
+    type: chePlugin
+    id: redhat.vscode-yaml:0.3.0
+  - name: eduke-build
+    type: dockerimage
+    image: mm4eche/eduke32-build
+    mountSources: true
+    memoryLimit: 256M
+  - name: eduke-run
+    type: dockerimage
+    image: mm4eche/eduke32-run
+    env:
+       - name: RESOLUTION
+         value: 800x600x16
+    endpoints:
+       - name: desktop
+         port: 6080
+         attributes:
+           protocol: http
+           public: 'true'
+    mountSources: true
+    memoryLimit: 256M
+commands:
+  - name: clone eduke32
+    actions:
+      - type: exec
+        component: eduke-build
+        command: git svn clone -r HEAD https://svn.eduke32.com/eduke32/
+        workdir: /projects
+  - name: build eduke32
+    actions:
+      - type: exec
+        component: eduke-build
+        command: make
+        workdir: /projects/eduke32/
+  - name: get shareware resources
+    actions:
+      - type: exec
+        component: eduke-run
+        command: >
+                 curl 'http://hendricks266.duke4.net/files/3dduke13_data.7z' --compressed --silent -o /tmp/duke3d-shareware.7z &&
+                 7za e /tmp/duke3d-shareware.7z -o/projects/eduke32-resources &&
+                 rm -f /tmp/duke3d-shareware.7z
+  - name: copy executables
+    actions:
+      - type: exec
+        component: eduke-build
+        command: >
+                 cp eduke32 /projects/eduke32-resources/ &&
+                 cp mapster32 /projects/eduke32-resources/
+        workdir: /projects/eduke32/
+  - name: run eduke32
+    actions:
+      - type: exec
+        component: eduke-run
+        command: ./eduke32
+        workdir: /projects/eduke32
+
