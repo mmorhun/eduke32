@@ -2,29 +2,28 @@
 # Provides environment which allows to develop, build and run the project.
 # Limitations: only software render (no hardware acceleration on kubernetes cluster), no sound.
 
-specVersion: 0.0.1
-name: eduke32
+apiVersion: 1.0.0
+metadata:
+  name: eduke32
 projects:
   - name: eduke32-devfile
     source:
       type: git
       location: 'https://github.com/mmorhun/eduke32-devfile.git'
 components:
-  - name: theia-editor
-    type: cheEditor
-    id: org.eclipse.che.editor.theia:1.0.0
-  - name: exec-plugin
-    type: chePlugin
-    id: che-machine-exec-plugin:0.0.1
-  - name: yaml-support-plugin
-    type: chePlugin
-    id: redhat.vscode-yaml:0.3.0
-  - name: eduke-build
+  - type: cheEditor
+    id: eclipse/che-theia/latest
+  - type: chePlugin
+    id: eclipse/che-machine-exec-plugin/latest
+  - type: chePlugin
+    id: redhat/vscode-yaml/latest
+    memoryLimit: 256M
+  - alias: eduke-build
     type: dockerimage
     image: mm4eche/eduke32-build
     mountSources: true
     memoryLimit: 256M
-  - name: eduke-run
+  - alias: eduke-run
     type: dockerimage
     image: mm4eche/eduke32-run
     env:
@@ -37,7 +36,7 @@ components:
            protocol: http
            public: 'true'
     mountSources: true
-    memoryLimit: 256M
+    memoryLimit: 512M
 commands:
   - name: clone eduke32
     actions:
@@ -73,4 +72,3 @@ commands:
         component: eduke-run
         command: ./eduke32
         workdir: /projects/eduke32
-
