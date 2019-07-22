@@ -10,57 +10,57 @@ components:
     id: eclipse/che-theia/latest
   - type: chePlugin
     id: eclipse/che-machine-exec-plugin/latest
-  - alias: eduke-build
+  - alias: eduke32-build
     type: dockerimage
     image: mm4eche/eduke32-build
     mountSources: true
     memoryLimit: 256M
-  - alias: eduke-run
+  - alias: eduke32-run
     type: dockerimage
     image: mm4eche/eduke32-run
     env:
-       - name: RESOLUTION
-         value: 800x600x16
+      - value: 800x600x16
+        name: RESOLUTION
     endpoints:
-       - name: desktop
-         port: 6080
-         attributes:
-           protocol: http
-           public: 'true'
+      - name: desktop
+        port: 6080
+        attributes:
+          protocol: http
+          public: 'true'
     mountSources: true
     memoryLimit: 512M
 commands:
   - name: clone eduke32
     actions:
-      - type: exec
-        component: eduke-build
-        command: git svn clone -r HEAD https://svn.eduke32.com/eduke32/
-        workdir: /projects
+      - workdir: /projects
+        type: exec
+        command: 'git svn clone -r HEAD https://svn.eduke32.com/eduke32/'
+        component: eduke32-build
   - name: build eduke32
     actions:
-      - type: exec
-        component: eduke-build
+      - workdir: /projects/eduke32/
+        type: exec
         command: make
-        workdir: /projects/eduke32/
+        component: eduke32-build
   - name: get shareware resources
     actions:
       - type: exec
-        component: eduke-run
         command: >
-                 curl 'http://hendricks266.duke4.net/files/3dduke13_data.7z' --compressed --silent -o /tmp/duke3d-shareware.7z &&
-                 7za e /tmp/duke3d-shareware.7z -o/projects/eduke32-resources &&
-                 rm -f /tmp/duke3d-shareware.7z
-  - name: copy executables
+          curl 'http://hendricks266.duke4.net/files/3dduke13_data.7z' --compressed --silent -o /tmp/duke3d-shareware.7z &&
+          7za e /tmp/duke3d-shareware.7z -o/projects/eduke32-resources &&
+          rm -f /tmp/duke3d-shareware.7z
+        component: eduke32-run
+  - name: copy binaries into resources directory
     actions:
       - type: exec
-        component: eduke-build
         command: >
-                 cp eduke32 /projects/eduke32-resources/ &&
-                 cp mapster32 /projects/eduke32-resources/
-        workdir: /projects/eduke32/
+          cp eduke32 /projects/eduke32-resources/ &&
+          cp mapster32 /projects/eduke32-resources/
+        component: eduke32-run
+        workdir: /projects/eduke32
   - name: run eduke32
     actions:
       - type: exec
-        component: eduke-run
         command: ./eduke32
-        workdir: /projects/eduke32
+        component: eduke32-run
+        workdir: /projects/eduke32-resources
