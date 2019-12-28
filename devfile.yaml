@@ -10,6 +10,8 @@ components:
     id: eclipse/che-theia/latest
   - type: chePlugin
     id: eclipse/che-machine-exec-plugin/latest
+  - type: chePlugin
+    id: che-incubator/cpptools/latest
   - alias: eduke32-build
     type: dockerimage
     image: mm4eche/eduke32-build

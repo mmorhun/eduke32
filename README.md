@@ -19,5 +19,4 @@ For the application running network latency and bandwidth is important. If Che s
 If remote desktop has lags, try to lower the resolution via `RESOLUTION` environment variable in the `eduke32-run` container.
 
 TODOs:
- - Add C++ language tools plug-in when ready
  - Add ability to configure password for remote desktop
